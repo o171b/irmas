@@ -2,17 +2,33 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { Menu, X, ShoppingBag, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCartStore } from "@/stores/useCartStore";
 import { categories } from "@/constants/products";
+import { cn } from "@/lib/utils";
 
 export function Header() {
+  const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const totalItems = useCartStore((s) => s.totalItems());
   const openCart = useCartStore((s) => s.openCart);
+
+  const isActive = (href: string) => {
+    if (href === "/") return pathname === "/";
+    return pathname.startsWith(href);
+  };
+
+  const navLinkClass = (href: string) =>
+    cn(
+      "relative text-sm font-medium transition-colors after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:bg-foreground after:transition-transform hover:after:scale-x-100",
+      isActive(href)
+        ? "text-foreground after:scale-x-100"
+        : "text-muted-foreground hover:text-foreground"
+    );
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -31,20 +47,26 @@ export function Header() {
           </Link>
 
           <nav className="hidden lg:flex lg:items-center lg:gap-8">
-            {categories.slice(0, 4).map((cat) => (
+            <Link
+              href="/"
+              className={navLinkClass("/")}
+            >
+              Home
+            </Link>
+            {categories.filter((c) => c.slug !== "all").slice(0, 4).map((cat) => (
               <Link
                 key={cat.id}
                 href={`/categories/${cat.slug}`}
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                className={navLinkClass(`/categories/${cat.slug}`)}
               >
                 {cat.name}
               </Link>
             ))}
             <Link
               href="/products"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              className={navLinkClass("/products")}
             >
-              All Products
+              All Collections
             </Link>
           </nav>
         </div>
@@ -96,11 +118,24 @@ export function Header() {
       {isMenuOpen && (
         <div className="border-t lg:hidden">
           <nav className="flex flex-col gap-2 px-4 py-4 sm:px-6">
-            {categories.map((cat) => (
+            <Link
+              href="/"
+              className={cn(
+                "rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground",
+                isActive("/") ? "bg-muted font-semibold text-foreground" : "text-muted-foreground"
+              )}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Home
+            </Link>
+            {categories.filter((c) => c.slug !== "all").map((cat) => (
               <Link
                 key={cat.id}
                 href={`/categories/${cat.slug}`}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                className={cn(
+                  "rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground",
+                  isActive(`/categories/${cat.slug}`) ? "bg-muted font-semibold text-foreground" : "text-muted-foreground"
+                )}
                 onClick={() => setIsMenuOpen(false)}
               >
                 {cat.name}
@@ -108,10 +143,13 @@ export function Header() {
             ))}
             <Link
               href="/products"
-              className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className={cn(
+                "rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground",
+                isActive("/products") ? "bg-muted font-semibold text-foreground" : "text-muted-foreground"
+              )}
               onClick={() => setIsMenuOpen(false)}
             >
-              All Products
+              All Collections
             </Link>
           </nav>
         </div>

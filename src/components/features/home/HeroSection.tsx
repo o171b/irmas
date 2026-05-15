@@ -24,12 +24,6 @@ export function HeroSection() {
           >
             Shop Now
           </Link>
-          <Link
-            href="/categories/dresses"
-            className={cn(buttonVariants({ variant: "outline", size: "lg" }), "min-w-[160px]")}
-          >
-            View Dresses
-          </Link>
         </div>
       </div>
     </section>
